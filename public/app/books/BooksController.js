@@ -1,10 +1,10 @@
 (function() {
 
     angular.module('app')
-        .controller('BooksController', ['$q', 'books', 'dataService', 'badgeService', '$cookies', '$cookieStore', '$log', BooksController]);
+        .controller('BooksController', ['$q', 'books', 'dataService', 'badgeService', '$cookies', '$cookieStore', '$log', '$route', 'BooksResource', BooksController]);
 
 
-    function BooksController($q, books, dataService, badgeService, $cookies, $cookieStore, $log) {
+    function BooksController($q, books, dataService, badgeService, $cookies, $cookieStore, $log, $route, BooksResource) {
 
         var vm = this;
 
@@ -33,33 +33,29 @@
         }
         */
 
-        dataService.getAllBooks()
-            .then(getBooksSuccess, null, getBooksNotification)
-            .catch(errorCallback)
-            .finally(getAllBooksComplete);
+        //dataService.getAllBooks()
+        //    .then(getBooksSuccess, null, getBooksNotification)
+        //    .catch(errorCallback)
+        //    .finally(getAllBooksComplete);
+
+        vm.allBooks = BooksResource.query();
 
         function getBooksSuccess(books) {
             //throw 'error in success handler';
             vm.allBooks = books;
         }
 
-        //function getBooksError(reason) {
-        //    console.log(reason);
-        //}
-
         function getBooksNotification(notification) {
             //console.log('Promise Notification: ' + notification);
         }
 
         function errorCallback(errorMsg) {
-            //console.log('Error Message: ' + errorMsg);
+            console.log('Error Message: ' + errorMsg);
         }
 
         function getAllBooksComplete() {
             //console.log('getAllBooks has completed');
         }
-
-        //vm.allReaders = dataService.getAllReaders();
 
         dataService.getAllReaders()
             .then(getReadersSuccess)
@@ -80,12 +76,22 @@
 
         vm.lastEdited = $cookieStore.get('lastEdited');
 
-        $log.log('logging with log');
-        $log.info('logging with info');
-        $log.warn('logging with warn');
-        $log.error('logging with error');
-        $log.debug('logging with debug');
+        vm.deleteBook = function (bookID) {
 
+            dataService.deleteBook(bookID)
+                .then(deleteBookSuccess)
+                .catch(deleteBookError);
+
+        };
+
+        function deleteBookSuccess(message) {
+            $log.info(message);
+            $route.reload();
+        }
+
+        function deleteBookError(errorMessage) {
+            $log.error(errorMessage);
+        }
 
     }
 
